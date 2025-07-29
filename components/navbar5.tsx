@@ -26,8 +26,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ToggleMode } from "./ToggleMode";
+import SearchBar from "./SearchBar";
+import { useSearchStore } from "@/lib/search-store";
+import { useEffect, useState } from "react";
 
 const Navbar5 = () => {
+
   const features = [
     {
       title: "Dashboard",
@@ -130,6 +134,7 @@ const Navbar5 = () => {
             </NavigationMenuList>
           </NavigationMenu>
           <div className="hidden items-center gap-4 lg:flex">
+            <SearchBar />
             <ToggleMode />
             <a href="/login"><Button variant="outline">Sign in</Button></a>
             <Button>Start for free</Button>
