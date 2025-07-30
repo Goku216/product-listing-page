@@ -1,6 +1,6 @@
 "use client";
 
-import { MenuIcon } from "lucide-react";
+import { MenuIcon, LogOut, User, ShoppingCart } from "lucide-react";
 
 import {
   Accordion,
@@ -25,18 +25,30 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import { ToggleMode } from "./ToggleMode";
 import SearchBar from "./SearchBar";
-import { useSearchStore } from "@/lib/search-store";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { useCart } from "@/lib/cart-context";
 
 const Navbar5 = () => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const { getTotalItems } = useCart();
 
   const features = [
     {
       title: "Dashboard",
       description: "Overview of your activity",
-      href: "#",
+      href: "/dashboard",
     },
     {
       title: "Analytics",
@@ -65,11 +77,15 @@ const Navbar5 = () => {
     },
   ];
 
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <section className="mx-4 py-4">
       <div className="container">
         <nav className="flex items-center justify-between">
-          <a
+          <Link
             href="/"
             className="flex items-center gap-2"
           >
@@ -81,7 +97,7 @@ const Navbar5 = () => {
             <span className="text-lg font-semibold tracking-tighter">
               MyStore
             </span>
-          </a>
+          </Link>
           <NavigationMenu className="hidden lg:block">
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -136,8 +152,53 @@ const Navbar5 = () => {
           <div className="hidden items-center gap-4 lg:flex">
             <SearchBar />
             <ToggleMode />
-            <a href="/login"><Button variant="outline">Sign in</Button></a>
-            <Button>Start for free</Button>
+            {isAuthenticated && (
+              <Link href="/cart" className="relative">
+                <Button variant="outline" size="icon">
+                  <ShoppingCart className="h-4 w-4" />
+                  {getTotalItems() > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
+                      {getTotalItems()}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+            )}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    {user?.firstName}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>
+                    {user?.firstName} {user?.lastName}
+                  </DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">
+                    {user?.email}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/login"><Button variant="outline">Sign in</Button></Link>
+                <Link href="/signup"><Button>Start for free</Button></Link>
+              </>
+            )}
           </div>
           <Sheet>
             <SheetTrigger asChild className="lg:hidden">
@@ -148,7 +209,7 @@ const Navbar5 = () => {
             <SheetContent side="top" className="max-h-screen overflow-auto">
               <SheetHeader>
                 <SheetTitle>
-                  <a
+                  <Link
                     href="https://www.shadcnblocks.com"
                     className="flex items-center gap-2"
                   >
@@ -160,7 +221,7 @@ const Navbar5 = () => {
                     <span className="text-lg font-semibold tracking-tighter">
                       Shadcnblocks.com
                     </span>
-                  </a>
+                  </Link>
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col p-4">
@@ -172,7 +233,7 @@ const Navbar5 = () => {
                     <AccordionContent>
                       <div className="grid md:grid-cols-2">
                         {features.map((feature, index) => (
-                          <a
+                          <Link
                             href={feature.href}
                             key={index}
                             className="rounded-md p-3 transition-colors hover:bg-muted/70"
@@ -185,7 +246,7 @@ const Navbar5 = () => {
                                 {feature.description}
                               </p>
                             </div>
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     </AccordionContent>
@@ -204,8 +265,28 @@ const Navbar5 = () => {
                 </div>
                 <div className="mt-6 flex flex-col gap-4">
                   <ToggleMode />
-                 <Button variant="outline">Sign in</Button>
-                  <Button>Start for free</Button>
+                  {isAuthenticated ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-sm font-medium">
+                        Welcome, {user?.firstName}!
+                      </div>
+                      <Link href="/cart" className="relative">
+                        <Button variant="outline" className="w-full">
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Cart ({getTotalItems()})
+                        </Button>
+                      </Link>
+                      <Button variant="outline" onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Link href="/login"><Button variant="outline">Sign in</Button></Link>
+                      <Link href="/signup"><Button>Start for free</Button></Link>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>

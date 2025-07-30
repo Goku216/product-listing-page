@@ -9,10 +9,15 @@ import { Car, Eye, Grid3X3, Heart, List, ShoppingCart, Star } from "lucide-react
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchStore } from "@/lib/search-store";
+import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/auth-context";
+import { toast } from "react-toastify";
 
 export default function ProductsPage() {
   const searchQuery = useSearchStore((state)=> state.searchTerm)
   const [debouncedSearch, setDebouncedSearch] = useState<string>(searchQuery)
+  const { addToCart, isAuthenticated } = useCart()
+  const { user } = useAuth()
 
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedSearch(searchQuery), 300)
@@ -49,7 +54,6 @@ export default function ProductsPage() {
    </section>
 )
 
-
    const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -74,6 +78,18 @@ export default function ProductsPage() {
       </div>
     );
   };
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    addToCart({
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      image: product.image,
+    })
+  }
 
   return (
     <section>
@@ -198,9 +214,16 @@ export default function ProductsPage() {
                    
                   </div>
                   
-                  <Button className="cursor-pointer" >
+                  <Button 
+                    className="cursor-pointer" 
+                    onClick={(e) => {
+                      handleAddToCart(e, product)
+                      toast("Item Added!")}
+                    }
+                    disabled={!isAuthenticated}
+                  >
                     <ShoppingCart className="w-4 h-4" />
-                    Add to Cart
+                    {isAuthenticated ? "Add to Cart" : "Login to Add"}
                   </Button>
                 </CardFooter>
               </div>

@@ -3,6 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { AuthProvider } from "@/lib/auth-context";
+import { CartProvider } from "@/lib/cart-context";
+import { ToastContainer} from 'react-toastify';
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +39,14 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange>
         <QueryProvider>
+        <AuthProvider>
+        <CartProvider>
         {children}
+        </CartProvider>
+        </AuthProvider>
         </QueryProvider>
         </ThemeProvider>
+        <ToastContainer />
       </body>
     </html>
   );
